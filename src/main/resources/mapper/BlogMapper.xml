@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cr.dao.BlogDao">
+
+    <resultMap id="getBlogAndType" type="Blog">
+        <association property="type" column="type_id" select="com.cr.dao.TypeDao.selectById"></association>
+        <association property="user" column="user_id" select="com.cr.dao.UserDao.selectById"></association>
+        <association property="tags" column="id" select="com.cr.dao.TagDao.getTagsByBlogId"></association>
+    </resultMap>
+
+    <resultMap id="getBlogAndType2" type="Blog">
+        <id property="id" column="id"></id>
+        <association property="type" column="type_id" select="com.cr.dao.TypeDao.selectById"></association>
+        <association property="tags" column="id" select="com.cr.dao.TagDao.getTagsByBlogId"></association>
+    </resultMap>
+
+    <!--List<Blog> getB(@Param("currentPage") int currentPage, @Param("blog") Blog blog);-->
+    <select id="getB" resultMap="getBlogAndType">
+        select * from t_blog left join t_type on t_blog.type_id=t_type.id
+        <where>
+            <if test="#{blog.title} != '' and #{blog.title} !=null">
+                title like "%"#{blog.title}"%"
+            </if>
+            <if test="#{blog.type.name} !='' and #{blog.type.name} !=null">
+                and t_type.name=#{blog.type.name}
+            </if>
+
+        </where>
+    </select>
+
+    <!--Blog getBlogById(@Param("id") Long id);-->
+    <select id="getBlogById" resultMap="getBlogAndType2">
+        select * from t_blog
+        <where>
+            <if test="id!=0l and id !=null">
+                id= ${id}
+            </if>
+        </where>
+    </select>
+
+    <!--IPage<Type> getPageByLike(Page<Blog> page, BlogQuery blogQuery);-->
+    <select id="getPageByLike" resultMap="getBlogAndType">
+        select b.* from t_blog as b left join t_type as t on b.type_id=t.id
+        <trim prefix="where" suffixOverrides="and">
+            <if test="#{blogQuery.title} != '' and #{blogQuery.title} !=null">
+                title like "%"#{blogQuery.title}"%" and
+            </if>
+            <if test="blogQuery.typeId!=0l and blogQuery.typeId !=null">
+                b.type_id= ${blogQuery.typeId} and
+            </if>
+            <if test="blogQuery.recommend !=  false">
+                b.recommend= ${blogQuery.recommend}
+            </if>
+
+        </trim>
+    </select>
+
+    <!--List<Blog> getBlogSearch(String query,Integer currentPage);-->
+    <select id="getBlogSearch" resultMap="getBlogAndType">
+        select * from t_blog
+        <trim prefix="where">
+            <if test="#{query} != null and #{query} !=''">
+                title like "%"#{query}"%" or content like "%"#{query}"%"
+            </if>
+        </trim>
+    </select>
+
+
+
+    <!--List<Blog> getBlogPage(@Param("currentPage") int currentPage);-->
+    <select id="getBlogPage" resultMap="getBlogAndType">
+        select * from t_blog
+    </select>
+
+
+
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cr.dao.TagDao">
+
+    <!--Tag getTagsByBlogId(@Param("id") Long id);-->
+    <select id="getTagsByBlogId" resultType="Tag">
+        select t.* from t_blog_tags as bt left join t_tag as t on bt.tags_id = t.id
+        <where>
+            <if test="id!=0l and id !=null">
+                bt.blogs_id = ${id}
+            </if>
+        </where>
+    </select>
+
+</mapper>
